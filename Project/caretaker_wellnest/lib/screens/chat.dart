@@ -5,8 +5,11 @@ class Chat extends StatefulWidget {
   final String caretakerId;
   final String familyMemberId;
 
-  const Chat(
-      {super.key, required this.caretakerId, required this.familyMemberId});
+  const Chat({
+    super.key,
+    required this.caretakerId,
+    required this.familyMemberId,
+  });
 
   @override
   State<Chat> createState() => _ChatState();
@@ -16,28 +19,52 @@ class _ChatState extends State<Chat> {
   final SupabaseClient supabase = Supabase.instance.client;
   final TextEditingController _messageController = TextEditingController();
   List<Map<String, dynamic>> messages = [];
+  bool isLoading = true; // Track loading state
 
   @override
   void initState() {
     super.initState();
-    fetchMessages();
+    _initializeChat();
+  }
+
+  /// Initialize chat by fetching messages and setting up listener
+  Future<void> _initializeChat() async {
+    await fetchMessages();
     listenForMessages();
   }
 
   /// Fetch chat history between caretaker and family member
   Future<void> fetchMessages() async {
-    final response = await supabase
-        .from('tbl_chat')
-        .select()
-        .or('chat_fromcid.eq.${widget.caretakerId}, chat_fromfid.eq.${widget.familyMemberId}')
-        .or('chat_tocid.eq.${widget.caretakerId}, chat_tofid.eq.${widget.familyMemberId}')
-        .order('datetime', ascending: true);
+    try {
+      final response = await supabase
+          .from('tbl_chat')
+          .select()
+          .match({
+            'chat_fromcid': widget.caretakerId,
+            'chat_tofid': widget.familyMemberId,
+          })
+          .or(
+            'chat_fromfid.eq.${widget.familyMemberId},chat_tocid.eq.${widget.caretakerId}',
+          )
+          .order('datetime', ascending: true);
 
-    if (mounted) {
-      setState(() {
-        messages =
-            response.map((msg) => Map<String, dynamic>.from(msg)).toList();
-      });
+      if (mounted) {
+        setState(() {
+          messages =
+              response.map((msg) => Map<String, dynamic>.from(msg)).toList();
+          isLoading = false; // Done loading
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          isLoading = false; // Stop loading even on error
+        });
+        print('Error fetching messages: $e'); // Log error for debugging
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load messages: $e')),
+        );
+      }
     }
   }
 
@@ -50,16 +77,28 @@ class _ChatState extends State<Chat> {
         .listen((snapshot) {
           if (mounted) {
             setState(() {
-              // Clear the existing messages list to avoid duplicates
-              messages.clear();
+              final filteredMessages = snapshot.where((message) {
+                return (message['chat_fromcid'] == widget.caretakerId &&
+                        message['chat_tofid'] == widget.familyMemberId) ||
+                    (message['chat_fromfid'] == widget.familyMemberId &&
+                        message['chat_tocid'] == widget.caretakerId);
+              }).toList();
 
-              // Add all messages from the snapshot to the list
-              messages.addAll(
-                  snapshot.map((msg) => Map<String, dynamic>.from(msg)));
-
-              // Sort the messages by datetime
-              messages.sort((a, b) => a['datetime'].compareTo(b['datetime']));
+              for (var message in filteredMessages) {
+                if (!messages
+                    .any((msg) => msg['chat_id'] == message['chat_id'])) {
+                  messages.add(Map<String, dynamic>.from(message));
+                }
+              }
             });
+          }
+        })
+        .onError((error) {
+          print('Stream error: $error'); // Log stream errors
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Stream error: $error')),
+            );
           }
         });
   }
@@ -69,16 +108,24 @@ class _ChatState extends State<Chat> {
     final messageText = _messageController.text.trim();
     if (messageText.isEmpty) return;
 
-    await supabase.from('tbl_chat').insert({
-      'chat_fromcid': widget.caretakerId,
-      'chat_fromfid': null,
-      'chat_tocid': null,
-      'chat_tofid': widget.familyMemberId,
-      'chat_content': messageText,
-      'datetime': DateTime.now().toIso8601String(),
-    });
-    listenForMessages();
-    _messageController.clear();
+    try {
+      await supabase.from('tbl_chat').insert({
+        'chat_fromcid': widget.caretakerId,
+        'chat_fromfid': null,
+        'chat_tocid': null,
+        'chat_tofid': widget.familyMemberId,
+        'chat_content': messageText,
+        'datetime': DateTime.now().toIso8601String(),
+      });
+      _messageController.clear();
+    } catch (e) {
+      print('Error sending message: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send message: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -88,33 +135,41 @@ class _ChatState extends State<Chat> {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              reverse: false,
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
-                final message = messages[index];
-                final isMe = message['chat_fromcid'] == widget.caretakerId;
+            child: isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : messages.isEmpty
+                    ? const Center(child: Text('No messages yet'))
+                    : ListView.builder(
+                        reverse: false,
+                        itemCount: messages.length,
+                        itemBuilder: (context, index) {
+                          final message = messages[index];
+                          final isMe =
+                              message['chat_fromcid'] == widget.caretakerId;
 
-                return Align(
-                  alignment:
-                      isMe ? Alignment.centerRight : Alignment.centerLeft,
-                  child: Container(
-                    margin:
-                        const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isMe ? Colors.greenAccent : Colors.grey[300],
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      message['chat_content'] ?? '',
-                      style:
-                          TextStyle(color: isMe ? Colors.white : Colors.black),
-                    ),
-                  ),
-                );
-              },
-            ),
+                          return Align(
+                            alignment: isMe
+                                ? Alignment.centerRight
+                                : Alignment.centerLeft,
+                            child: Container(
+                              margin: const EdgeInsets.symmetric(
+                                  vertical: 5, horizontal: 10),
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: isMe
+                                    ? Colors.greenAccent
+                                    : Colors.grey[300],
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Text(
+                                message['chat_content'] ?? '',
+                                style: TextStyle(
+                                    color: isMe ? Colors.white : Colors.black),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
