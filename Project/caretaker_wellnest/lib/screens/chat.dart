@@ -50,13 +50,15 @@ class _ChatState extends State<Chat> {
         .listen((snapshot) {
           if (mounted) {
             setState(() {
-              for (var message in snapshot) {
-                // Add only if not already in the list
-                if (!messages
-                    .any((msg) => msg['chat_id'] == message['chat_id'])) {
-                  messages.add(Map<String, dynamic>.from(message));
-                }
-              }
+              // Clear the existing messages list to avoid duplicates
+              messages.clear();
+
+              // Add all messages from the snapshot to the list
+              messages.addAll(
+                  snapshot.map((msg) => Map<String, dynamic>.from(msg)));
+
+              // Sort the messages by datetime
+              messages.sort((a, b) => a['datetime'].compareTo(b['datetime']));
             });
           }
         });

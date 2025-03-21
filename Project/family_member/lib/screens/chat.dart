@@ -24,44 +24,46 @@ class _ChatState extends State<Chat> {
     listenForMessages();
   }
 
-  /// Fetch chat history between family member and caretaker
   Future<void> fetchMessages() async {
-    final response = await supabase
-        .from('tbl_chat')
-        .select()
-        .or('chat_fromcid.eq.${widget.caretakerId}, chat_fromfid.eq.${widget.familyMemberId}')
-        .or('chat_tocid.eq.${widget.caretakerId}, chat_tofid.eq.${widget.familyMemberId}')
-        .order('datetime', ascending: true);
+  final response = await supabase
+      .from('tbl_chat')
+      .select()
+      .or('and(chat_fromcid.eq.${widget.caretakerId}, chat_tofid.eq.${widget.familyMemberId})') // Caretaker → Family Member
+      .or('and(chat_fromfid.eq.${widget.familyMemberId}, chat_tocid.eq.${widget.caretakerId})') // Family Member → Caretaker
+      .order('datetime', ascending: true);
 
-    if (mounted) {
-      setState(() {
-        messages =
-            response.map((msg) => Map<String, dynamic>.from(msg)).toList();
+  if (mounted) {
+    setState(() {
+      messages = response.map((msg) => Map<String, dynamic>.from(msg)).toList();
+    });
+  }
+}
+
+/// Listen for new messages in real time
+void listenForMessages() {
+  supabase
+      .from('tbl_chat')
+      .stream(primaryKey: ['chat_id'])
+      .order('datetime', ascending: true)
+      .listen((snapshot) {
+        print('🔄 New snapshot received: $snapshot'); // Debugging line
+        if (mounted) {
+          setState(() {
+            // Convert the current messages list to a Set to remove duplicates
+            final uniqueMessages = messages.toSet();
+
+            // Add new messages to the Set
+            for (var message in snapshot) {
+              uniqueMessages.add(Map<String, dynamic>.from(message));
+            }
+
+            // Convert the Set back to a list and sort by datetime
+            messages = uniqueMessages.toList();
+            messages.sort((a, b) => a['datetime'].compareTo(b['datetime']));
+          });
+        }
       });
-    }
-  }
-
-  /// Listen for new messages in real time
-  void listenForMessages() {
-    supabase
-        .from('tbl_chat')
-        .stream(primaryKey: ['chat_id'])
-        .order('datetime', ascending: true)
-        .listen((snapshot) {
-          print('🔄 New snapshot received: $snapshot'); // Debugging line
-          if (mounted) {
-            setState(() {
-              for (var message in snapshot) {
-                // Add only if not already in the list
-                if (!messages
-                    .any((msg) => msg['chat_id'] == message['chat_id'])) {
-                  messages.add(Map<String, dynamic>.from(message));
-                }
-              }
-            });
-          }
-        });
-  }
+}
 
   /// Send a new message
   Future<void> sendMessage() async {
