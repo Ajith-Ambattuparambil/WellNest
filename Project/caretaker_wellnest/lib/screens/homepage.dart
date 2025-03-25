@@ -84,16 +84,16 @@ class _HomepageState extends State<Homepage> {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 24, 56, 111),
+                color: Color.fromARGB(255, 0, 36, 94),
               ),
               child: const Text('Menu',
                   style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(
               leading: const Icon(Icons.home,
-                  color: Color.fromARGB(255, 24, 56, 111)),
+                  color: Color.fromARGB(255, 0, 36, 94)),
               title: const Text('Home',
-                  style: TextStyle(color: Color.fromARGB(255, 24, 56, 111))),
+                  style: TextStyle(color: Color.fromARGB(255, 0, 36, 94))),
               onTap: () {
                 Navigator.push(context,
                     MaterialPageRoute(builder: (context) => const Homepage()));
@@ -101,9 +101,9 @@ class _HomepageState extends State<Homepage> {
             ),
             ListTile(
               leading: const Icon(Icons.person,
-                  color: Color.fromARGB(255, 24, 56, 111)),
+                  color: Color.fromARGB(255, 0, 36, 94)),
               title: const Text('Apply Leave',
-                  style: TextStyle(color: Color.fromARGB(255, 24, 56, 111))),
+                  style: TextStyle(color: Color.fromARGB(255, 0, 36, 94))),
               onTap: () {
                 Navigator.push(
                     context,
@@ -113,9 +113,9 @@ class _HomepageState extends State<Homepage> {
             ),
             ListTile(
               leading: const Icon(Icons.settings,
-                  color: Color.fromARGB(255, 24, 56, 111)),
+                  color: Color.fromARGB(255, 0, 36, 94)),
               title: const Text('Leave Management',
-                  style: TextStyle(color: Color.fromARGB(255, 24, 56, 111))),
+                  style: TextStyle(color: Color.fromARGB(255, 0, 36, 94))),
               onTap: () {
                 Navigator.push(
                     context,
@@ -126,9 +126,9 @@ class _HomepageState extends State<Homepage> {
             const Divider(),
             ListTile(
               leading: const Icon(Icons.logout,
-                  color: Color.fromARGB(255, 24, 56, 111)),
+                  color: Color.fromARGB(255, 0, 36, 94)),
               title: const Text('Logout',
-                  style: TextStyle(color: Color.fromARGB(255, 24, 56, 111))),
+                  style: TextStyle(color: Color.fromARGB(255, 0, 36, 94))),
               onTap: () {
                 Navigator.pushReplacement(
                   context,
@@ -145,6 +145,7 @@ class _HomepageState extends State<Homepage> {
           children: [
             AppBar(
               backgroundColor: Color.fromARGB(255, 0, 36, 94),
+              foregroundColor: Colors.white,
               title: const Text(
                 'CareTaker Wellnest',
                 style: TextStyle(color: Colors.white),
@@ -157,28 +158,32 @@ class _HomepageState extends State<Homepage> {
                     }),
               ],
             ),
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 30,
-                  backgroundImage: NetworkImage(caretaker_photo),
-                  onBackgroundImageError: (exception, stackTrace) {},
-                ),
-                const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      caretaker_name,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
+            Center(
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 30,
+                    backgroundImage: NetworkImage(caretaker_photo),
+                    onBackgroundImageError: (exception, stackTrace) {},
+                  ),
+                  const SizedBox(width: 16),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Center(
+                        child: Text(
+                          caretaker_name,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ],
+                    ],
+                  ),
+                ],
+              ),
             ),
             Expanded(
               child: GridView.builder(

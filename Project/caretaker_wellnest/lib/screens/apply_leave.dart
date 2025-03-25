@@ -110,6 +110,7 @@ class _ApplyLeaveState extends State<ApplyLeave> {
       appBar: AppBar(
         title: const Text('Leave Application',style: TextStyle(color:Colors.white),),
         backgroundColor: Color.fromARGB(255, 0, 36, 90), // AppBar color
+        foregroundColor: Colors.white,
         elevation: 0,
       ),
       body: Container(

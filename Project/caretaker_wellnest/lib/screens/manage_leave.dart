@@ -59,6 +59,7 @@ class _ManageLeaveState extends State<ManageLeave> {
         appBar: AppBar(
           title: const Text('Leave Manager',style: TextStyle(color: Colors.white),),
           backgroundColor: Color.fromARGB(255, 0 , 36, 80),
+          foregroundColor: Colors.white,
           elevation: 0,
         ),
         body: leaveData.isEmpty
