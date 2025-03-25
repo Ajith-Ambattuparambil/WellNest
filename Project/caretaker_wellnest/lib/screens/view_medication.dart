@@ -83,10 +83,11 @@ class _ViewMedicationState extends State<ViewMedication> {
       appBar: AppBar(title: const Text('View Medication', style: TextStyle(
         fontSize: 23, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 255, 255)
       ),), 
-      backgroundColor: Color.fromARGB(255  , 0, 36, 94),),
+      backgroundColor: Color.fromARGB(255, 0, 36, 94),
+      foregroundColor: Colors.white,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             medications.isEmpty
                 ? const Center(child: Text("No Medications Available"))
@@ -111,6 +112,7 @@ class _ViewMedicationState extends State<ViewMedication> {
                       },
                     ),
                   ),
+            const SizedBox(height: 24),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 0, 36, 94),

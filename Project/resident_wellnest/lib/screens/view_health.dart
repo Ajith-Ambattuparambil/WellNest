@@ -10,7 +10,6 @@ class ViewHealth extends StatefulWidget {
 }
 
 class _ViewHealthState extends State<ViewHealth> {
-
   final SupabaseClient supabase = Supabase.instance.client;
   Map<String, dynamic>? healthData;
   bool isLoading = true;
@@ -24,7 +23,8 @@ class _ViewHealthState extends State<ViewHealth> {
     try {
       final response = await supabase
           .from('tbl_healthrecord')
-          .select().eq('resident_id', widget.residentId)
+          .select()
+          .eq('resident_id', widget.residentId)
           .order('health_date', ascending: false)
           .limit(1)
           .single();
@@ -40,6 +40,7 @@ class _ViewHealthState extends State<ViewHealth> {
       print('Error fetching health data: $error');
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,9 +79,11 @@ class _ViewHealthState extends State<ViewHealth> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Date: ${healthData!['health_date']}",
+                                "Date: ${DateTime.parse(healthData!['health_date']).toLocal().toString().split(' ')[0]}",
                                 style: const TextStyle(
-                                    fontSize: 18, fontWeight: FontWeight.bold),
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                               _buildHealthCard("Sugar Level",
                                   healthData!['health_sugarlevel']),

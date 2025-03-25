@@ -69,6 +69,7 @@ class _ViewMedappointmentsState extends State<ViewMedappointments> {
               fontSize: 23),
         ),
         backgroundColor: Color.fromARGB(255, 0, 36, 94),
+        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),

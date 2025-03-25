@@ -56,13 +56,14 @@ class _ViewHealthState extends State<ViewHealth> {
               fontWeight: FontWeight.bold),
         ),
         backgroundColor: Color.fromARGB(255, 0, 36, 94),
+        foregroundColor: Colors.white,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : healthData == null
               ? Center(
                   child: Column(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       "No health records found.",
@@ -73,7 +74,7 @@ class _ViewHealthState extends State<ViewHealth> {
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 15, vertical: 14),
-                        backgroundColor: Color.fromARGB(255, 24, 56, 111),
+                        backgroundColor: Color.fromARGB(255, 0, 36, 94),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -106,9 +107,11 @@ class _ViewHealthState extends State<ViewHealth> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "Date: ${healthData!['health_date']}",
+                          "Date: ${DateTime.parse(healthData!['health_date']).toLocal().toString().split(' ')[0]}",
                           style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                         _buildHealthCard(
                             "Sugar Level", healthData!['health_sugarlevel']),
@@ -149,7 +152,7 @@ class _ViewHealthState extends State<ViewHealth> {
                             'Update Health',
                             style: TextStyle(
                                 fontSize: 18,
-                                color: Color.fromARGB(255, 255, 255, 255),
+                                color: Colors.white,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),

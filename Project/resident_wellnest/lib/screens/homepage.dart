@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:resident_wellnest/screens/caretaker_profile.dart';
 import 'package:resident_wellnest/screens/fam_profile.dart';
+import 'package:resident_wellnest/screens/login_page.dart';
 import 'package:resident_wellnest/screens/resident_profile.dart';
 import 'package:resident_wellnest/screens/view_health.dart';
 import 'package:resident_wellnest/screens/view_medappointment.dart';
@@ -50,7 +51,8 @@ class _HomepageState extends State<Homepage> {
   Future<void> logout() async {
     await supabase.auth.signOut();
     if (mounted) {
-      Navigator.pushReplacementNamed(context, '/login'); // Redirect to login screen
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => LoginPage()));
     }
   }
 

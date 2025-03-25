@@ -72,7 +72,6 @@ class _ViewRoutineState extends State<ViewRoutine> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(230, 255, 252, 197),
-    
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 0, 36, 94),
         foregroundColor: Colors.white,
