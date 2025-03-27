@@ -84,7 +84,7 @@ class _ViewHealthState extends State<ViewHealth> {
                           context,
                           MaterialPageRoute(
                               builder: (context) => UpdateHealth(
-                                    resident_id: widget.resident_id,
+                                    residentId: widget.resident_id,
                                   )),
                         );
                       },
@@ -145,7 +145,7 @@ class _ViewHealthState extends State<ViewHealth> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => UpdateHealth(
-                                      resident_id: widget.resident_id)),
+                                      residentId: widget.resident_id)),
                             );
                           },
                           child: const Text(

@@ -129,7 +129,7 @@ class _ViewMedicationState extends State<ViewMedication> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        UpdateMedication(resident_id: widget.resident_id),
+                        UpdateMedication(residentId: widget.resident_id),
                   ),
                 );
 

@@ -1,6 +1,10 @@
+import 'package:caretaker_wellnest/components/notification_service.dart';
 import 'package:caretaker_wellnest/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // Import the intl package for time formatting
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
 
 class UpdateRoutine extends StatefulWidget {
   String resident_id;
@@ -39,13 +43,22 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
         'resident_id': widget.resident_id
       });
 
+      final now = DateTime.now();
+      final testTime = "${now.hour}:${now.minute + 2}"; // 2 minutes from now
+      print("Scheduling test notification for $testTime");
+      await RoutineNotificationService.scheduleNotification(
+        DateTime.now().millisecondsSinceEpoch ~/ 1000,
+        'Medication for ${widget.resident_id}',
+        testTime,
+      );
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Updation Successful"),
           backgroundColor: Color.fromARGB(255, 86, 1, 1),
         ),
       );
-      Navigator.pop(context,true);
+      Navigator.pop(context, true);
     } catch (e) {
       print("Error: $e");
     } finally {
@@ -63,14 +76,15 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
         title: const Text(
           "Routine Setup",
           style: TextStyle(
-              fontWeight: FontWeight.bold,
-              ),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Color.fromARGB(255, 0, 36, 94),
         foregroundColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back,
-              ),
+          icon: const Icon(
+            Icons.arrow_back,
+          ),
           onPressed: () {
             Navigator.pop(context);
           },
@@ -130,10 +144,10 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10)),
                       ),
-                      onPressed: () {
-                        {
-                          submit();
-                        }
+                      onPressed: () async {
+                        
+                        // await RoutineNotificationService.cancelAllNotifications();
+                        RoutineNotificationService.testScheduling();
                       },
                       child: const Text(
                         'Update Routine',

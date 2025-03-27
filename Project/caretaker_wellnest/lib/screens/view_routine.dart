@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class ViewRoutine extends StatefulWidget {
-  String resident_id;
-   ViewRoutine({super.key, required  this.resident_id});
+  final String residentId;
+  const ViewRoutine({super.key, required this.residentId});
 
   @override
   State<ViewRoutine> createState() => _ViewRoutineState();
@@ -18,15 +18,20 @@ class _ViewRoutineState extends State<ViewRoutine> {
   @override
   void initState() {
     super.initState();
-    NotificationService.init();
+    RoutineNotificationService.init();
     fetchAndScheduleRoutine();
   }
 
   Future<void> fetchAndScheduleRoutine() async {
     try {
-      final response = await supabase.from('tbl_routine').select().eq('resident_id', widget.resident_id) .order('created_at', ascending: false) // Assuming you have a 'created_at' column
-        .limit(1)
-        .single();
+      final response = await supabase
+          .from('tbl_routine')
+          .select()
+          .eq('resident_id', widget.residentId)
+          .order('created_at',
+              ascending: false) // Assuming you have a 'created_at' column
+          .limit(1)
+          .single();
       print("Fetched Routine Data: $response");
 
       {
@@ -52,16 +57,17 @@ class _ViewRoutineState extends State<ViewRoutine> {
 
         // Schedule notifications
         // Replace the existing notification scheduling block
-routineData.forEach((name, time) {
-  try {
-    NotificationService.scheduleNotification(
-      routineData.keys.toList().indexOf(name), 
-      name, time  // Pass the time string directly
-    );
-  } catch (e) {
-    print("Error scheduling notification for $name: $e");
-  }
-});
+        // routineData.forEach((name, time) {
+        //   try {
+        //     RoutineNotificationService.scheduleNotification(
+        //         routineData.keys.toList().indexOf(name),
+        //         name,
+        //         time // Pass the time string directly
+        //         );
+        //   } catch (e) {
+        //     print("Error scheduling notification for $name: $e");
+        //   }
+        // });
       }
     } catch (e) {
       print("Error fetching data from Supabase: $e");
@@ -73,11 +79,15 @@ routineData.forEach((name, time) {
     return Scaffold(
       backgroundColor: Color.fromARGB(230, 255, 252, 197),
       appBar: AppBar(
-        backgroundColor: Color.fromARGB(255, 0, 36, 94),
-        foregroundColor: Colors.white,
-        title: const Text('View Routine',
-        style: TextStyle(color: Color.fromARGB(255, 255, 255, 255),
-        fontSize: 23, fontWeight: FontWeight.bold),)),
+          backgroundColor: Color.fromARGB(255, 0, 36, 94),
+          foregroundColor: Colors.white,
+          title: const Text(
+            'View Routine',
+            style: TextStyle(
+                color: Color.fromARGB(255, 255, 255, 255),
+                fontSize: 23,
+                fontWeight: FontWeight.bold),
+          )),
       body: Column(
         children: [
           const SizedBox(height: 16),
@@ -106,26 +116,29 @@ routineData.forEach((name, time) {
           ),
           const SizedBox(height: 24),
           ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromARGB(255, 0, 36, 94),
-                foregroundColor: Colors.white,
-                padding:
-                    const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromARGB(255, 0, 36, 94),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 28),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
-            onPressed: () {
-              Navigator.push(
+            onPressed: () async {
+              final result = await Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => UpdateRoutine(
-                  resident_id:widget.resident_id
-                )),
+                MaterialPageRoute(
+                    builder: (context) =>
+                        UpdateRoutine(resident_id: widget.residentId)),
               );
+              if (result) {
+                fetchAndScheduleRoutine();
+              }
             },
-            child: const Text('Update Routine',style: TextStyle(
-              fontSize: 18, fontWeight: FontWeight.bold
-            ),),
+            child: const Text(
+              'Update Routine',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
           const SizedBox(height: 16),
         ],

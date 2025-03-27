@@ -2,8 +2,8 @@ import 'package:caretaker_wellnest/main.dart';
 import 'package:flutter/material.dart';
 
 class UpdateMedication extends StatefulWidget {
-  String resident_id;
-   UpdateMedication({super.key, required this.resident_id});
+  final String residentId;
+   const UpdateMedication({super.key, required this.residentId});
 
   @override
   State<UpdateMedication> createState() => _UpdateMedicationState();
@@ -28,7 +28,7 @@ class _UpdateMedicationState extends State<UpdateMedication> {
         'medication_timing': _foodtiming.text,
         'medication_count': _medicinecount.text,
         'medication_time': _medicinetime, // Use the selected radio button value
-        'resident_id': widget.resident_id
+        'resident_id': widget.residentId
       });
 
       ScaffoldMessenger.of(context).showSnackBar(

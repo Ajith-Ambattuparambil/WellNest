@@ -64,7 +64,7 @@ class _FamilyMemberState extends State<FamilyMember> {
 
   Future<void> viewProof(String filePath) async {
     try {
-        await launchUrl(Uri.parse(filePath));
+      await launchUrl(Uri.parse(filePath));
     } catch (e) {
       print('ERROR OPENING FILE: $e');
     }

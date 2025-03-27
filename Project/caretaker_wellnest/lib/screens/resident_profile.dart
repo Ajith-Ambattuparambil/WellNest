@@ -129,7 +129,7 @@ class _ResidentProfileState extends State<ResidentProfile> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => ViewRoutine(resident_id: resident_id),
+                    builder: (context) => ViewRoutine(residentId: resident_id),
                   ),
                 );
               },

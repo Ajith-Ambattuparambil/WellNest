@@ -10,13 +10,16 @@ dependencies:
   flutter:
     sdk: flutter
   supabase_flutter: ^2.8.4
-  intl: ^0.17.0
+  intl: ^0.20.2
   flutter_holo_date_picker: ^2.0.0
-  flutter_local_notifications: ^18.0.1
+  flutter_local_notifications: ^19.0.0
   timezone: ^0.10.0
   permission_handler: ^11.4.0
   google_fonts: ^6.2.1
   lottie: ^3.3.1
+  android_alarm_manager_plus: ^4.0.7
+  device_info_plus: ^11.3.0
+  flutter_timezone: ^4.1.0
   
 
 dev_dependencies:

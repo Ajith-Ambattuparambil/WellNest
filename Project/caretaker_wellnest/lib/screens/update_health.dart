@@ -1,10 +1,9 @@
 import 'package:caretaker_wellnest/main.dart';
 import 'package:flutter/material.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UpdateHealth extends StatefulWidget {
-  String resident_id;
-  UpdateHealth({super.key, required this.resident_id});
+  final String residentId;
+  const UpdateHealth({super.key, required this.residentId});
 
   @override
   State<UpdateHealth> createState() => _UpdateHealthState();
@@ -39,7 +38,7 @@ final _formKey = GlobalKey<FormState>();
         'health_lp': _lp.text,
         'health_thyroid': _thyroid.text,
         'health_liver': _liverfunction.text,
-        'resident_id':widget.resident_id
+        'resident_id':widget.residentId
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
