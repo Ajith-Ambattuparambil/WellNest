@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'complaints.dart'; // Import the Complaints page
 
 class ViewComplaint extends StatefulWidget {
-  
   ViewComplaint({super.key});
 
   @override
@@ -30,7 +29,8 @@ class _ViewComplaintState extends State<ViewComplaint> {
       // Fetch data from 'tbl_complaint'
       final response = await supabase
           .from('tbl_complaint')
-          .select().eq('familymember_id', supabase.auth.currentUser!.id)
+          .select()
+          .eq('familymember_id', supabase.auth.currentUser!.id)
           .order('complaint_date', ascending: false); // Order by latest first
 
       // Update the state with fetched data
@@ -52,7 +52,6 @@ class _ViewComplaintState extends State<ViewComplaint> {
 
   @override
   Widget build(BuildContext context) {
-  
     return Scaffold(
       backgroundColor: const Color.fromARGB(230, 255, 252, 197),
       appBar: AppBar(
@@ -108,21 +107,42 @@ class _ViewComplaintState extends State<ViewComplaint> {
                                             BorderRadius.circular(10)),
                                     child: ListTile(
                                       title: Text(
-                                          style: TextStyle(
-                                              fontWeight: FontWeight.bold,
+                                        complaint['complaint_title'] ??
+                                            "No Title",
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Color.fromARGB(255, 0, 0, 0),
+                                        ),
+                                      ),
+                                      subtitle: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            complaint['complaint_content'] ??
+                                                "No Description",
+                                            style: TextStyle(
                                               color:
-                                                  Color.fromARGB(255, 0, 0, 0)),
-                                          complaint['complaint_title'] ??
-                                              "No Title"),
-                                      subtitle: Text(
-                                          style: TextStyle(
-                                              color:
-                                                  Color.fromARGB(255, 0, 0, 0)),
-                                          complaint['complaint_content'] ??
-                                              "No Description"),
-                                      /*trailing: const Icon(
-                                          Icons.arrow_forward_ios,
-                                          size: 18),*/
+                                                  Color.fromARGB(255, 0, 0, 0),
+                                            ),
+                                          ),
+                                          SizedBox(
+                                              height:
+                                                  4), // Adds some spacing between content and reply
+                                          Text(
+                                            "Reply: ${complaint['complaint_reply'] ?? 'No reply yet'}",
+                                            style: TextStyle(
+                                              color: Color.fromARGB(
+                                                  255,
+                                                  100,
+                                                  100,
+                                                  100), // Slightly grey for distinction
+                                              fontStyle: FontStyle
+                                                  .italic, // Optional: to differentiate reply
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   );
                                 },
@@ -138,9 +158,7 @@ class _ViewComplaintState extends State<ViewComplaint> {
         onPressed: () {
           Navigator.push(
             context,
-            MaterialPageRoute(
-                builder: (context) => const Complaints(
-                    )),
+            MaterialPageRoute(builder: (context) => const Complaints()),
           );
         },
         backgroundColor: const Color.fromARGB(255, 0, 36, 94),

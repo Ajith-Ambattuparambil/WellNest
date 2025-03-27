@@ -77,6 +77,7 @@ class _ComplaintsState extends State<Complaints> {
                 color: Color.fromARGB(255, 255, 255, 255),
                 fontSize: 23)),
         backgroundColor: const Color.fromARGB(255, 0, 36, 94),
+        foregroundColor: Colors.white,
         elevation: 4,
         shadowColor: Colors.black45,
       ),
