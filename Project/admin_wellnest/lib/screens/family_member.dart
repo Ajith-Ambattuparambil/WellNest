@@ -1,6 +1,7 @@
 import 'package:admin_wellnest/main.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:url_launcher/url_launcher.dart';
 
 class FamilyMember extends StatefulWidget {
   final String id;
@@ -58,6 +59,14 @@ class _FamilyMemberState extends State<FamilyMember> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> viewProof(String filePath) async {
+    try {
+        await launchUrl(Uri.parse(filePath));
+    } catch (e) {
+      print('ERROR OPENING FILE: $e');
     }
   }
 
@@ -119,6 +128,7 @@ class _FamilyMemberState extends State<FamilyMember> {
                                         DataColumn(label: Text('Address')),
                                         DataColumn(label: Text('Contact')),
                                         DataColumn(label: Text('Email')),
+                                        DataColumn(label: Text("Proof")),
                                         DataColumn(label: Text('Photo')),
                                       ],
                                       rows: familyMembers
@@ -137,6 +147,18 @@ class _FamilyMemberState extends State<FamilyMember> {
                                                   DataCell(Text(member[
                                                           'familymember_email'] ??
                                                       '')),
+                                                  DataCell(
+                                                    TextButton(
+                                                      onPressed: () => viewProof(
+                                                          member['familymember_proof']
+                                                              .toString()),
+                                                      child: const Text(
+                                                          'View Proof',
+                                                          style: TextStyle(
+                                                              color:
+                                                                  Colors.blue)),
+                                                    ),
+                                                  ),
                                                   DataCell(
                                                     member['familymember_photo'] !=
                                                             null
@@ -214,9 +236,10 @@ class _FamilyMemberState extends State<FamilyMember> {
                                                             .format(DateTime
                                                                 .parse(booking[
                                                                     'familybooking_todate'])))),
-                                                        DataCell(Text(
-                                                            booking['tbl_room']['room_name']
-                                                                .toString())),
+                                                        DataCell(Text(booking[
+                                                                    'tbl_room']
+                                                                ['room_name']
+                                                            .toString())),
                                                         DataCell(Text(booking[
                                                                 'familybooking_count']
                                                             .toString())),
