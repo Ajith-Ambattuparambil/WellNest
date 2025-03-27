@@ -24,7 +24,9 @@ class _ViewRoutineState extends State<ViewRoutine> {
 
   Future<void> fetchAndScheduleRoutine() async {
     try {
-      final response = await supabase.from('tbl_routine').select().eq('resident_id', widget.resident_id).single();
+      final response = await supabase.from('tbl_routine').select().eq('resident_id', widget.resident_id) .order('created_at', ascending: false) // Assuming you have a 'created_at' column
+        .limit(1)
+        .single();
       print("Fetched Routine Data: $response");
 
       {
@@ -38,30 +40,28 @@ class _ViewRoutineState extends State<ViewRoutine> {
           'routine_calltime': 'Call Time',
           'routine_dinnertime': 'Dinner Time',
           'routine_sleeptime': 'Sleep Time',
-          
         };
-
         response.forEach((key, value) {
           if (routineMapping.containsKey(key) && value != null) {
             tempData[routineMapping[key]!] = value;
           }
         });
-
         setState(() {
           routineData = tempData;
         });
 
         // Schedule notifications
-        routineData.forEach((name, time) {
-          try {
-            DateTime routineTime = DateTime.parse("2025-02-27 $time");
-            print("Scheduling notification for $name at $routineTime");
-            NotificationService.scheduleNotification(
-                routineData.keys.toList().indexOf(name), name, routineTime);
-          } catch (e) {
-            print("Error parsing time for $name: $e");
-          }
-        });
+        // Replace the existing notification scheduling block
+routineData.forEach((name, time) {
+  try {
+    NotificationService.scheduleNotification(
+      routineData.keys.toList().indexOf(name), 
+      name, time  // Pass the time string directly
+    );
+  } catch (e) {
+    print("Error scheduling notification for $name: $e");
+  }
+});
       }
     } catch (e) {
       print("Error fetching data from Supabase: $e");

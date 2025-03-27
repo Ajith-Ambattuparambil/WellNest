@@ -43,38 +43,38 @@ class _ViewMedicationState extends State<ViewMedication> {
       }
 
       // Schedule notifications for medications
-      for (var medication in medications) {
-        scheduleNotification(medication);
-      }
+      // for (var medication in medications) {
+      //   scheduleNotification(medication);
+      // }
     } catch (error) {
       print("Error fetching medications: $error");
     }
   }
 
-  void scheduleNotification(Map<String, dynamic> medication) {
-    String time = medication['medication_timing']; // Format: HH:mm:ss
-    // int count = medication['medication_count'];
-    String name = medication['medication_time']; // Medication Name
+  // void scheduleNotification(Map<String, dynamic> medication) {
+  //   String time = medication['medication_timing']; // Format: HH:mm:ss
+  //   // int count = medication['medication_count'];
+  //   String name = medication['medication_time']; // Medication Name
 
-    DateTime now = DateTime.now();
-    DateTime medicationDateTime = DateTime(
-      now.year, now.month, now.day,
-      int.parse(time.split(":")[0]), // Hour
-      int.parse(time.split(":")[1]), // Minute
-    );
+  //   DateTime now = DateTime.now();
+  //   DateTime medicationDateTime = DateTime(
+  //     now.year, now.month, now.day,
+  //     int.parse(time.split(":")[0]), // Hour
+  //     int.parse(time.split(":")[1]), // Minute
+  //   );
 
-    // Schedule a notification 10 minutes before the medication time
-    DateTime reminderTime =
-        medicationDateTime.subtract(const Duration(minutes: 10));
+  //   // Schedule a notification 10 minutes before the medication time
+  //   DateTime reminderTime =
+  //       medicationDateTime.subtract(const Duration(minutes: 10));
 
-    if (reminderTime.isAfter(now)) {
-      NotificationService.scheduleNotification(
-        medicationDateTime.millisecondsSinceEpoch ~/ 1000, // Unique ID
-        "Medication Reminder: $name",
-        reminderTime,
-      );
-    }
-  }
+  //   if (reminderTime.isAfter(now)) {
+  //     NotificationService.scheduleNotification(
+  //       medicationDateTime.millisecondsSinceEpoch ~/ 1000, // Unique ID
+  //       "Medication Reminder: $name",
+  //       reminderTime,
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {

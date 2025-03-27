@@ -32,29 +32,29 @@ class _ViewMedappointmentsState extends State<ViewMedappointments> {
     });
 
     // Schedule notifications for all fetched appointments
-    for (var appointment in appointments) {
-      scheduleNotification(appointment);
-    }
+    //for (var appointment in appointments) {
+    //   scheduleNotification(appointment);
+    // }
   }
 
-  void scheduleNotification(Map<String, dynamic> appointment) {
-    String doctorName = appointment['appointment_name'];
-    String date = appointment['appointment_date']; // Format: YYYY-MM-DD
-    String time = appointment['appointment_time']; // Format: HH:mm:ss
-    DateTime appointmentDateTime = DateTime.parse("$date $time");
+  // void scheduleNotification(Map<String, dynamic> appointment) {
+  //   String doctorName = appointment['appointment_name'];
+  //   String date = appointment['appointment_date']; // Format: YYYY-MM-DD
+  //   String time = appointment['appointment_time']; // Format: HH:mm:ss
+  //   DateTime appointmentDateTime = DateTime.parse("$date $time");
 
-    // Schedule a notification 30 minutes before appointment
-    DateTime reminderTime =
-        appointmentDateTime.subtract(const Duration(minutes: 30));
+  //   // Schedule a notification 30 minutes before appointment
+  //   DateTime reminderTime =
+  //       appointmentDateTime.subtract(const Duration(minutes: 30));
 
-    if (reminderTime.isAfter(DateTime.now())) {
-      NotificationService.scheduleNotification(
-        appointmentDateTime.millisecondsSinceEpoch ~/ 1000, // Unique ID
-        "Appointment Reminder: Dr. $doctorName",
-        reminderTime,
-      );
-    }
-  }
+  //   if (reminderTime.isAfter(DateTime.now())) {
+  //     NotificationService.scheduleNotification(
+  //       appointmentDateTime.millisecondsSinceEpoch ~/ 1000, // Unique ID
+  //       "Appointment Reminder: Dr. $doctorName",
+  //       reminderTime,
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
