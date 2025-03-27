@@ -36,7 +36,7 @@ class _NewAdmissionState extends State<NewAdmission> {
       
       final publicUrl = await supabase.storage.from('resident_files').getPublicUrl(filePath);
       if (await canLaunchUrl(Uri.parse(publicUrl))) {
-        await launchUrl(Uri.parse(publicUrl));
+        await launchUrl(Uri.parse(filePath));
       } else {
         throw 'Could not launch URL';
       }

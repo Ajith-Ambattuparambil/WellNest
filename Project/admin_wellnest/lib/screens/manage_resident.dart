@@ -240,7 +240,7 @@ class _ManageResidentState extends State<ManageResident> {
                                 SizedBox(width: 10),
                                 ElevatedButton.icon(
                                   icon: const Icon(
-                                    Icons.person_add,
+                                    Icons.payment,
                                     size: 18,
                                   ),
                                   label: const Text("Payment"),
@@ -268,7 +268,7 @@ class _ManageResidentState extends State<ManageResident> {
                                 SizedBox(width: 10),
                                 ElevatedButton.icon(
                                   icon: const Icon(
-                                    Icons.person_add,
+                                    Icons.person,
                                     size: 18,
                                   ),
                                   label: const Text("Family Member"),
@@ -327,7 +327,7 @@ class _ManageResidentState extends State<ManageResident> {
                                 SizedBox(width: 10),
                                 ElevatedButton.icon(
                                   icon: const Icon(
-                                    Icons.person_add,
+                                    Icons.payment,
                                     size: 18,
                                   ),
                                   label: const Text("Payment"),
@@ -355,7 +355,7 @@ class _ManageResidentState extends State<ManageResident> {
                                 SizedBox(width: 10),
                                 ElevatedButton.icon(
                                   icon: const Icon(
-                                    Icons.person_add,
+                                    Icons.person_2_rounded,
                                     size: 18,
                                   ),
                                   label: const Text("Family Member"),

@@ -506,7 +506,6 @@ class _ResidentregistrationState extends State<Residentregistration> {
                   ))),
         ));
   }
-
   Widget _buildTextField(TextEditingController controller, String label,
       IconData icon, String? Function(String?)? validator,
       {bool obscureText = false}) {
