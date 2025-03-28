@@ -225,7 +225,7 @@ class RoutineNotificationService {
     await scheduleNotification(
       999,
       "Test",
-      "21:25", // Replace with a time 2 minutes in the future
+      "21:31", // Replace with a time 2 minutes in the future
     );
   }
 }
