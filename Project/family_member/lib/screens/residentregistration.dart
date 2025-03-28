@@ -2,12 +2,10 @@ import 'dart:io';
 import 'package:family_member/screens/manage_profile.dart';
 import 'package:family_member/services/auth_service.dart';
 import 'package:file_picker/file_picker.dart';
-
 import 'package:family_member/components/form_validation.dart';
 import 'package:family_member/main.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Residentregistration extends StatefulWidget {
   const Residentregistration({super.key});
@@ -261,8 +259,7 @@ class _ResidentregistrationState extends State<Residentregistration> {
         appBar: AppBar(
           title: Text(
             'Resident Registration Page',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,fontSize: 20),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
           ),
           backgroundColor: Color.fromARGB(255, 0, 36, 94),
           foregroundColor: Colors.white,
@@ -296,8 +293,7 @@ class _ResidentregistrationState extends State<Residentregistration> {
                                     style: TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
-                                        color:
-                                            Color.fromARGB(255, 0, 36, 94)),
+                                        color: Color.fromARGB(255, 0, 36, 94)),
                                     textAlign: TextAlign.center,
                                   ),
                                   const SizedBox(height: 20),
@@ -506,6 +502,7 @@ class _ResidentregistrationState extends State<Residentregistration> {
                   ))),
         ));
   }
+
   Widget _buildTextField(TextEditingController controller, String label,
       IconData icon, String? Function(String?)? validator,
       {bool obscureText = false}) {
