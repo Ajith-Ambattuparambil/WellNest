@@ -3,6 +3,7 @@ import 'package:family_member/screens/fam_profile.dart';
 import 'package:family_member/screens/homepage.dart';
 import 'package:family_member/screens/login_page.dart';
 import 'package:family_member/screens/visit_booking.dart';
+import 'package:family_member/services/notification_services.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'residentregistration.dart';
@@ -122,6 +123,7 @@ class _ProfileGridState extends State<ProfileGrid> {
 
   Future<void> fetchResident() async {
     try {
+      await NotificationService.scheduleDailyCallReminder();
       final response = await supabase
           .from('tbl_resident')
           .select()
@@ -182,11 +184,40 @@ class ProfileCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-              builder: (context) => HomePage(profile: profile['resident_id'])),
-        );
+        // Check resident_status before navigating
+        final residentStatus = profile['resident_status'];
+        if (residentStatus == 3) {
+          // Only navigate if status is 3 (admission complete)
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => HomePage(profile: profile['resident_id']),
+            ),
+          );
+        } else {
+          // Show a message based on the status
+          String message;
+          switch (residentStatus) {
+            case 0:
+            case 1:
+              message = 'Admission is not complete yet.';
+              break;
+            case 2:
+              message = 'Admission has been rejected.';
+              break;
+            case 4:
+              message = 'Resident has moved out or checked out.';
+              break;
+            default:
+              message = 'Invalid resident status.';
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(message),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
       },
       child: Card(
         shape: RoundedRectangleBorder(
@@ -198,12 +229,14 @@ class ProfileCard extends StatelessWidget {
           child: Column(
             children: [
               CircleAvatar(
-                backgroundImage: NetworkImage(profile['resident_photo']),
+                backgroundImage: profile['resident_photo'] != null
+                    ? NetworkImage(profile['resident_photo'])
+                    : const AssetImage('assets/default_avatar.png') as ImageProvider,
                 radius: 50,
               ),
               const SizedBox(height: 8.0),
               Text(
-                profile['resident_name'],
+                profile['resident_name'] ?? 'Unknown Name',
                 style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
