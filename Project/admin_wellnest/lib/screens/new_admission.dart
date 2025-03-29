@@ -44,6 +44,34 @@ class _NewAdmissionState extends State<NewAdmission> {
     }
   }
 
+  Future<void> verifyAdm(String res, int status) async {
+    try {
+      await supabase
+          .from('tbl_resident')
+          .update({'resident_status': status}).eq('resident_id', res);
+    String msg = status == 1 ? "Accepted" : "Rejected";
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text("Success"),
+          content: Text("Admission $msg successfully"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                fetchFiletype();
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      print("ERROR UPDATING ADMISSION STATUS: $e");
+      
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -78,11 +106,15 @@ class _NewAdmissionState extends State<NewAdmission> {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.check, color: Colors.green),
-                    onPressed: () => {},
+                    onPressed: () => {
+                      verifyAdm(entry.value['resident_id'].toString(), 1),
+                    },
                   ),
                   IconButton(
                     icon: const Icon(Icons.close, color: Colors.red),
-                    onPressed: () => {},
+                    onPressed: () => {
+                      verifyAdm(entry.value['resident_id'].toString(), 2),
+                    },
                   ),
                 ],
               )),
