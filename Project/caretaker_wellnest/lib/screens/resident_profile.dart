@@ -143,7 +143,7 @@ class _ResidentProfileState extends State<ResidentProfile> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        ViewMedication(resident_id: resident_id),
+                        ViewMedication(residentId: resident_id),
                   ),
                 );
               },
