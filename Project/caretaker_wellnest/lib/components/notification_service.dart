@@ -46,8 +46,8 @@ class RoutineNotificationService {
       description: 'Reminders for daily routines',
       importance: Importance.max,
     );
-    final androidPlugin = _notificationsPlugin
-        .resolvePlatformSpecificImplementation<
+    final androidPlugin =
+        _notificationsPlugin.resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
     await androidPlugin?.createNotificationChannel(channel);
     print("Notification channel created: ${channel.id}");
@@ -66,7 +66,8 @@ class RoutineNotificationService {
       notificationStatus = await Permission.notification.request();
       print("Notification permission after request: $notificationStatus");
       if (notificationStatus.isPermanentlyDenied) {
-        print("Notification permission permanently denied. Opening settings...");
+        print(
+            "Notification permission permanently denied. Opening settings...");
         await openAppSettings();
       }
     }
@@ -86,13 +87,15 @@ class RoutineNotificationService {
 
     // Battery optimization exemption
     print("Checking battery optimization exemption...");
-    PermissionStatus batteryStatus = await Permission.ignoreBatteryOptimizations.status;
+    PermissionStatus batteryStatus =
+        await Permission.ignoreBatteryOptimizations.status;
     print("Battery optimization exemption status: $batteryStatus");
     if (batteryStatus.isDenied) {
       batteryStatus = await Permission.ignoreBatteryOptimizations.request();
       print("Battery optimization exemption after request: $batteryStatus");
       if (batteryStatus.isPermanentlyDenied) {
-        print("Battery optimization exemption permanently denied. Opening settings...");
+        print(
+            "Battery optimization exemption permanently denied. Opening settings...");
         await openAppSettings();
       }
     }
@@ -107,14 +110,16 @@ class RoutineNotificationService {
 
   // Show an immediate notification
   static Future<void> showImmediateNotification() async {
-    const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+    const AndroidNotificationDetails androidDetails =
+        AndroidNotificationDetails(
       'routine_channel',
       'Daily Routine Notifications',
       channelDescription: 'Reminders for daily routines',
       importance: Importance.max,
       priority: Priority.high,
     );
-    const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+    const NotificationDetails notificationDetails =
+        NotificationDetails(android: androidDetails);
     await _notificationsPlugin.show(
       0,
       'Test Notification',
@@ -157,14 +162,16 @@ class RoutineNotificationService {
         print('Scheduled for today: $scheduledDate');
       }
 
-      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+      const AndroidNotificationDetails androidDetails =
+          AndroidNotificationDetails(
         'routine_channel',
         'Daily Routine Notifications',
         channelDescription: 'Reminders for daily routines',
         importance: Importance.max,
         priority: Priority.high,
       );
-      const NotificationDetails notificationDetails = NotificationDetails(android: androidDetails);
+      const NotificationDetails notificationDetails =
+          NotificationDetails(android: androidDetails);
 
       // Check if exact alarm permission is granted
       final bool canUseExact = await Permission.scheduleExactAlarm.isGranted;
@@ -204,7 +211,8 @@ class RoutineNotificationService {
         await _notificationsPlugin.pendingNotificationRequests();
     print("Pending notifications: ${pendingNotifications.length}");
     for (final request in pendingNotifications) {
-      print("Pending notification - ID: ${request.id}, Title: ${request.title}, Body: ${request.body}, Payload: ${request.payload}");
+      print(
+          "Pending notification - ID: ${request.id}, Title: ${request.title}, Body: ${request.body}, Payload: ${request.payload}");
     }
   }
 

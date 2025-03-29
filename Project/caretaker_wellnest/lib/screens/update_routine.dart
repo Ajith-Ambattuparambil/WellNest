@@ -148,6 +148,7 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
                         
                         // await RoutineNotificationService.cancelAllNotifications();
                         RoutineNotificationService.testScheduling();
+                        submit();
                       },
                       child: const Text(
                         'Update Routine',
