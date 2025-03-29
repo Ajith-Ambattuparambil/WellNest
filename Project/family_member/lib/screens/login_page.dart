@@ -54,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
             );
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Login failed: User not found')),
+              const SnackBar(content: Text('Login failed: Family member not found')),
             );
           }
         }
