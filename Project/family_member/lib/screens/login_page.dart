@@ -1,3 +1,4 @@
+import 'package:family_member/main.dart';
 import 'package:family_member/services/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
@@ -30,7 +31,7 @@ class _LoginPageState extends State<LoginPage> {
 
       try {
         await _authService.storeCredentials(
-          _emailController.text, _passwordController.text);
+            _emailController.text, _passwordController.text);
         // Sign in with Supabase
         final response = await Supabase.instance.client.auth.signInWithPassword(
           email: _emailController.text.trim(),
@@ -39,13 +40,23 @@ class _LoginPageState extends State<LoginPage> {
 
         if (response.user != null) {
           // Navigate to ManageProfile screen on successful login
-          if (!mounted) return;
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const ManageProfile(),
-            ),
-          );
+          final familyMember = await supabase
+              .from('tbl_familymember')
+              .select()
+              .eq('familymember_id', response.user!.id);
+          if (familyMember.isNotEmpty) {
+            if (!mounted) return;
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const ManageProfile(),
+              ),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Login failed: User not found')),
+            );
+          }
         }
       } on AuthException catch (error) {
         print('Error is:$error');
@@ -77,7 +88,6 @@ class _LoginPageState extends State<LoginPage> {
         title: const Text(
           "Login Page",
           style: TextStyle(
-            
             fontSize: 23,
             fontWeight: FontWeight.bold,
           ),
