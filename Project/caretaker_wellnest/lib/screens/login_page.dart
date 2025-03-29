@@ -1,6 +1,7 @@
 import 'package:caretaker_wellnest/components/form_validation.dart';
 import 'package:caretaker_wellnest/main.dart';
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'homepage.dart'; 
 
 class LoginPage extends StatefulWidget {
@@ -19,45 +20,53 @@ class _LoginPageState extends State<LoginPage> {
   String email = '';
   String password = '';
 
-  Future<void> submit() async {
-    if (formKey.currentState!.validate()) {
-      setState(() {
-        email = emailController.text;
-        password = passwordController.text;
-      });
+ Future<void> submit() async {
+  if (formKey.currentState!.validate()) {
+    setState(() {
+      email = emailController.text;
+      password = passwordController.text;
+    });
 
-      try {
-        // Sign in with email and password
-        final response = await supabase.auth.signInWithPassword(
-          email: email,
-          password: password,
-        );
-
-        if (response.user != null) {
-          final familyMember = await supabase
-              .from('tbl_caretaker')
-              .select()
-              .eq('caretaker_id', response.user!.id);
-          if (familyMember.isNotEmpty) {
-            if (!mounted) return;
+    try {
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (response.user != null) {
+        final caretaker = await supabase
+            .from('tbl_caretaker')
+            .select()
+            .eq('caretaker_id', response.user!.id);
+            
+        if (caretaker.isNotEmpty) {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Homepage()),
-          );}
+          );
         } else {
-          print("Response: $response");
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Login failed: User not found')),
+            const SnackBar(content: Text('Login failed: Caretaker not found')),
           );
         }
-      } catch (e) {
-        // Handle other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
       }
+    } on AuthException catch (e) {
+      // Specific handling for auth errors
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.message}')),
+      );
+    } catch (e) {
+      // General error handling
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
