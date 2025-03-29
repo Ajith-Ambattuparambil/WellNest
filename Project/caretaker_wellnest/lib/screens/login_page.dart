@@ -34,15 +34,20 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         if (response.user != null) {
-          // Navigate to Homepage on successful login
+          final familyMember = await supabase
+              .from('tbl_caretaker')
+              .select()
+              .eq('caretaker_id', response.user!.id);
+          if (familyMember.isNotEmpty) {
+            if (!mounted) return;
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => Homepage()),
-          );
+          );}
         } else {
-          // Handle invalid credentials
+          print("Response: $response");
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid email or password')),
+            const SnackBar(content: Text('Login failed: User not found')),
           );
         }
       } catch (e) {
