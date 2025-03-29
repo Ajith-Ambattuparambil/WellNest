@@ -150,16 +150,12 @@ class _HomepageState extends State<Homepage> {
                 'CareTaker Wellnest',
                 style: TextStyle(color: Colors.white),
               ),
-              actions: [
-                IconButton(
-                    icon: const Icon(Icons.menu),
-                    onPressed: () {
-                      Scaffold.of(context).openDrawer();
-                    }),
-              ],
+              
             ),
+            SizedBox(height: 20),
             Center(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CircleAvatar(
                     radius: 30,
