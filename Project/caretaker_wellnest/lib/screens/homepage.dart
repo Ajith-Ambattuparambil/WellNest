@@ -4,6 +4,7 @@ import 'package:caretaker_wellnest/screens/manage_leave.dart';
 import 'package:caretaker_wellnest/screens/resident_profile.dart';
 import 'package:flutter/material.dart';
 import 'login_page.dart'; // Import the LoginPage
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 class Homepage extends StatefulWidget {
   const Homepage({super.key});
@@ -21,11 +22,25 @@ class _HomepageState extends State<Homepage> {
   String caretaker_name = "";
   String caretaker_photo = "";
 
+  Future<void> saveFcmToken() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await supabase.from('tbl_caretaker').update({'fcm_token': fcmToken}).eq(
+            'caretaker_id', supabase.auth.currentUser!.id);
+        print("Token Stored: $fcmToken");
+      }
+    } catch (e) {
+      print("FCM Token Error: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     fetchData();
     fetchcaretaker();
+    saveFcmToken();
   }
 
   Future<void> fetchcaretaker() async {
@@ -90,8 +105,8 @@ class _HomepageState extends State<Homepage> {
                   style: TextStyle(color: Colors.white, fontSize: 24)),
             ),
             ListTile(
-              leading: const Icon(Icons.home,
-                  color: Color.fromARGB(255, 0, 36, 94)),
+              leading:
+                  const Icon(Icons.home, color: Color.fromARGB(255, 0, 36, 94)),
               title: const Text('Home',
                   style: TextStyle(color: Color.fromARGB(255, 0, 36, 94))),
               onTap: () {
@@ -150,7 +165,6 @@ class _HomepageState extends State<Homepage> {
                 'CareTaker Wellnest',
                 style: TextStyle(color: Colors.white),
               ),
-              
             ),
             SizedBox(height: 20),
             Center(

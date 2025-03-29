@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:googleapis_auth/auth_io.dart' as auth;
 
 class Chat extends StatefulWidget {
   final String familyMemberId;
@@ -68,6 +72,118 @@ class _ChatState extends State<Chat> {
     }
   }
 
+  Future<void> sendNotification() async {
+    try {
+      final response = await supabase
+          .from('tbl_familymember')
+          .select()
+          .eq('familymember_id', widget.familyMemberId)
+          .single();
+
+      String name = response['familymember_name'] as String? ?? 'Family Member';
+
+      final ck = await supabase
+          .from('tbl_caretaker')
+          .select()
+          .eq('caretaker_id', widget.caretakerId)
+          .single();
+
+      String token = ck['fcm_token'];
+      String title = 'New message';
+      String body = 'You have a new message from $name.';
+      sendPushNotification(token, body, title);
+    } catch (a) {
+      print('Error sending notification: $a');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to send notification: $a')),
+        );
+      }
+    } finally {
+      print('Notification sent successfully!');
+    }
+  }
+
+  Future<Map<String, dynamic>> loadConfig() async {
+    try {
+      final String jsonString =
+          await rootBundle.loadString('asset/config.json');
+      print("DATA: $jsonString");
+      return json.decode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      print("Error loading config.json: $e");
+      return {}; // Return an empty map or handle appropriately
+    }
+  }
+
+  Future<String> getAccessToken() async {
+    // Your client ID and client secret obtained from Google Cloud Console
+    final serviceAccountJson = await loadConfig();
+
+    List<String> scopes = [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/firebase.database",
+      "https://www.googleapis.com/auth/firebase.messaging"
+    ];
+
+    http.Client client = await auth.clientViaServiceAccount(
+      auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
+      scopes,
+    );
+
+    // Obtain the access token
+    auth.AccessCredentials credentials =
+        await auth.obtainAccessCredentialsViaServiceAccount(
+            auth.ServiceAccountCredentials.fromJson(serviceAccountJson),
+            scopes,
+            client);
+
+    // Close the HTTP client
+    client.close();
+
+    // Return the access token
+    return credentials.accessToken.data;
+  }
+
+  void sendPushNotification(String userToken, String msg, String title) async {
+    try {
+      final String serverKey = await getAccessToken(); // Your FCM server key
+      const String fcmEndpoint =
+          'https://fcm.googleapis.com/v1/projects/wellnest-81951/messages:send';
+      final Map<String, dynamic> message = {
+        'message': {
+          'token':
+              userToken, // Token of the device you want to send the message to
+          'notification': {
+            "title": title,
+            "body": msg,
+          },
+          'data': {
+            'current_user_fcm_token':
+                userToken, // Include the current user's FCM token in data payload
+          },
+        }
+      };
+
+      final http.Response response = await http.post(
+        Uri.parse(fcmEndpoint),
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $serverKey',
+        },
+        body: jsonEncode(message),
+      );
+
+      if (response.statusCode == 200) {
+        print('FCM message sent successfully');
+      } else {
+        print('Failed to send FCM message: ${response.statusCode}');
+      }
+    } catch (e) {
+      print("Failed Notification: $e");
+    }
+  }
+
   /// Listen for new messages in real time
   void listenForMessages() {
     supabase
@@ -118,6 +234,7 @@ class _ChatState extends State<Chat> {
         'chat_content': messageText,
         'datetime': DateTime.now().toIso8601String(),
       });
+      sendNotification();
       _messageController.clear();
     } catch (e) {
       print('Error sending message: $e');

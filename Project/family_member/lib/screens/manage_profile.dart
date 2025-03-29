@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:family_member/main.dart';
 import 'package:family_member/screens/fam_profile.dart';
 import 'package:family_member/screens/homepage.dart';
@@ -5,6 +7,7 @@ import 'package:family_member/screens/login_page.dart';
 import 'package:family_member/screens/view_bookings.dart';
 import 'package:family_member/screens/visit_booking.dart';
 import 'package:family_member/services/notification_services.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'residentregistration.dart';
@@ -24,6 +27,20 @@ class _ManageProfileState extends State<ManageProfile> {
   void initState() {
     super.initState();
     fetchFamilyMember();
+    saveFcmToken();
+  }
+
+  Future<void> saveFcmToken() async {
+    try {
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      if (fcmToken != null) {
+        await supabase
+            .from('tbl_familymember')
+            .update({'fcm_token': fcmToken}).eq('familymember_id', supabase.auth.currentUser!.id);
+      }
+    } catch (e) {
+      print("FCM Token Error: $e");
+    }
   }
 
   Future<void> fetchFamilyMember() async {
@@ -160,51 +177,50 @@ class _ProfileGridState extends State<ProfileGrid> {
         },
       ),
       floatingActionButton: Row(
-  mainAxisAlignment: MainAxisAlignment.center,
-  children: [
-    FloatingActionButton.extended(
-      onPressed: () {
-        Navigator.push(
-          context, 
-          MaterialPageRoute(builder: (context) => VisitBooking()),
-        );
-      },
-      label: const Text(
-        'Book Visit',
-        style: TextStyle(color: Colors.white, fontSize: 20),
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => VisitBooking()),
+              );
+            },
+            label: const Text(
+              'Book Visit',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            icon: const Icon(Icons.event, color: Colors.white),
+            backgroundColor: const Color.fromARGB(255, 0, 36, 94),
+            heroTag: 'bookVisit', // Unique heroTag for each FAB
+          ),
+          const SizedBox(width: 16), // Space between buttons
+          FloatingActionButton.extended(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ViewBookings()),
+              );
+            },
+            label: const Text(
+              'View Bookings',
+              style: TextStyle(color: Colors.white, fontSize: 20),
+            ),
+            icon: const Icon(Icons.list_alt, color: Colors.white),
+            backgroundColor:
+                const Color.fromARGB(255, 94, 33, 0), // Different color
+            heroTag: 'viewBookings', // Unique heroTag for each FAB
+          ),
+        ],
       ),
-      icon: const Icon(Icons.event, color: Colors.white),
-      backgroundColor: const Color.fromARGB(255, 0, 36, 94),
-      heroTag: 'bookVisit', // Unique heroTag for each FAB
-    ),
-    const SizedBox(width: 16), // Space between buttons
-    FloatingActionButton.extended(
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => ViewBookings()),
-        );
-      },
-      label: const Text(
-        'View Bookings',
-        style: TextStyle(color: Colors.white, fontSize: 20),
-      ),
-      icon: const Icon(Icons.list_alt, color: Colors.white),
-      backgroundColor: const Color.fromARGB(255, 94, 33, 0), // Different color
-      heroTag: 'viewBookings', // Unique heroTag for each FAB
-    ),
-  ],
-),
-floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
 
 class ProfileCard extends StatelessWidget {
   final Map<String, dynamic> profile;
-
   const ProfileCard({super.key, required this.profile});
-
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -256,7 +272,8 @@ class ProfileCard extends StatelessWidget {
               CircleAvatar(
                 backgroundImage: profile['resident_photo'] != null
                     ? NetworkImage(profile['resident_photo'])
-                    : const AssetImage('assets/default_avatar.png') as ImageProvider,
+                    : const AssetImage('assets/default_avatar.png')
+                        as ImageProvider,
                 radius: 50,
               ),
               const SizedBox(height: 8.0),

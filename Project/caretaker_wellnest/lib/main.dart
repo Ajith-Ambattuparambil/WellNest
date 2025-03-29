@@ -1,5 +1,6 @@
 import 'package:caretaker_wellnest/components/notification_service.dart';
 import 'package:caretaker_wellnest/screens/login_page.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -7,6 +8,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized(); 
+  await Firebase.initializeApp();
   await Supabase.initialize(
     url: 'https://xigidxtugemqjqxxupbq.supabase.co',
     anonKey:
