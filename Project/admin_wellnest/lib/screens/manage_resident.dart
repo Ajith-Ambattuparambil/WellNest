@@ -24,8 +24,8 @@ class _ManageResidentState extends State<ManageResident> {
     try {
       final response = await supabase
           .from('tbl_resident')
-          .select("*,tbl_relation(*),tbl_room(*)")
-          .gt('resident_status', 0);
+          .select('*, tbl_relation(*), tbl_room(*)')
+          .inFilter('resident_status', [1, 3]);
       setState(() {
         _filetypeList = response;
       });
@@ -45,7 +45,34 @@ class _ManageResidentState extends State<ManageResident> {
   }
 
   void paymentVerify(String residentId) {
-    updateResidentStatus(residentId, 2);
+    updateResidentStatus(residentId, 3);
+  }
+
+  Future<void> deleteResident(String id) async {
+    try {
+      await supabase.from('tbl_assign').delete().eq('resident_id', id);
+      await supabase
+          .from('tbl_resident')
+          .update({'resident_status': 4}).eq('resident_id', id);
+      showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: Text("Success"),
+            content: Text("Resident Deleted Successfully"),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  child: Text("OK"))
+            ],
+          );
+        },
+      );
+    } catch (e) {
+      print("Error Deleting $e");
+    }
   }
 
   @override
@@ -277,7 +304,8 @@ class _ManageResidentState extends State<ManageResident> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => FamilyMember(
-                                            id: entry.value['familymember_id'].toString()),
+                                            id: entry.value['familymember_id']
+                                                .toString()),
                                       ),
                                     );
                                   },
@@ -293,6 +321,38 @@ class _ManageResidentState extends State<ManageResident> {
                                     elevation: 2,
                                   ),
                                 ),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                IconButton(
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                              title: Text("Delete Resident"),
+                                              content: Text(
+                                                  "Are you sure you want to delete this resident?"),
+                                              actions: [
+                                                TextButton(
+                                                    onPressed: () {
+                                                      Navigator.pop(context);
+                                                    },
+                                                    child: Text("Cancel")),
+                                                TextButton(
+                                                    onPressed: () {
+                                                      deleteResident(entry
+                                                          .value['resident_id']
+                                                          .toString());
+                                                    },
+                                                    child:
+                                                        Text("Confirm Delete"))
+                                              ]);
+                                        },
+                                      );
+                                    },
+                                    icon: Icon(Icons.delete_forever, 
+                                        color: Colors.red)),
                               ],
                             )
                           : Row(
@@ -364,7 +424,8 @@ class _ManageResidentState extends State<ManageResident> {
                                       context,
                                       MaterialPageRoute(
                                         builder: (context) => FamilyMember(
-                                            id: entry.value['familymember_id'].toString()),
+                                            id: entry.value['familymember_id']
+                                                .toString()),
                                       ),
                                     );
                                   },
