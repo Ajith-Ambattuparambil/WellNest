@@ -18,16 +18,21 @@ class _LeaveApplicationState extends State<LeaveApplication> {
   }
 
   Future<void> fetchFiletype() async {
-    try {
-      final response =
-          await supabase.from('tbl_leave').select().eq('leave_status', 0);
-      setState(() {
-        _filetypeList = response;
-      });
-    } catch (e) {
-      print("ERROR FETCHING FILE TYPE DATA: $e");
-    }
+  try {
+    final response = await supabase
+        .from('tbl_leave')
+        .select('*, tbl_caretaker("*")')
+        .eq('leave_status', 0);
+
+    setState(() {
+      _filetypeList = response;
+    });
+  } catch (e) {
+    print("ERROR FETCHING FILE TYPE DATA: $e");
   }
+}
+
+
 
   Future<void> updateLeaveStatus(String leaveId, int status) async {
     try {
@@ -113,6 +118,8 @@ class _LeaveApplicationState extends State<LeaveApplication> {
                           itemCount: _filetypeList.length,
                           itemBuilder: (context, index) {
                             final entry = _filetypeList[index];
+                            final caretaker=entry['tbl_caretaker']['caretaker_name'].toString();
+                            print(caretaker);
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
                               elevation: 3,
@@ -121,7 +128,7 @@ class _LeaveApplicationState extends State<LeaveApplication> {
                               ),
                               child: ListTile(
                                 title: Text(
-                                  entry['leave_reason'].toString(),
+                                  "${entry['leave_reason']} (by $caretaker)",
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 18,

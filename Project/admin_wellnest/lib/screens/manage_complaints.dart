@@ -21,8 +21,11 @@ class _ManageComplaintsState extends State<ManageComplaints> {
 
   Future<void> _fetchComplaints() async {
     try {
-      final response =
-          await supabase.from('tbl_complaint').select("*,tbl_familymember(*),tbl_resident(*)");
+      final response = await supabase
+          .from('tbl_complaint')
+          .select('*, tbl_familymember(*, tbl_resident!inner(resident_name))')
+          .eq('complaint_status', 0);
+      print("compaints $response");
       setState(() {
         complaints = response;
       });
@@ -75,9 +78,11 @@ class _ManageComplaintsState extends State<ManageComplaints> {
                     Text('Priority: ${complaint['complaint_priority']}'),
                     Text('Content: ${complaint['complaint_content']}'),
                     Text(
-                        'Resident: ${complaint['tbl_resident']['resident_name']}'),
+                      'Resident Name: ${complaint['tbl_familymember']?['tbl_resident']?['resident_name'].toString() ?? 'Unknown'}',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
                     Text(
-                        'Name: ${complaint['tbl_familymember']['familymember_name']}'),
+                        'Complaint Owner: ${complaint['tbl_familymember']['familymember_name']}'),
                     Text(
                         'Phone: ${complaint['tbl_familymember']['familymember_contact']}'),
                     Text(
