@@ -32,6 +32,7 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
       isLoading = true;
     });
     try {
+      _cancelExistingNotifications(widget.resident_id);
       await supabase.from('tbl_routine').insert({
         'routine_waketime': _waketime.text,
         'routine_sleeptime': _sleeptime.text,
@@ -43,14 +44,7 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
         'resident_id': widget.resident_id
       });
 
-      final now = DateTime.now();
-      final testTime = "${now.hour}:${now.minute + 2}"; // 2 minutes from now
-      print("Scheduling test notification for $testTime");
-      await RoutineNotificationService.scheduleNotification(
-        DateTime.now().millisecondsSinceEpoch ~/ 1000,
-        'Medication for ${widget.resident_id}',
-        testTime,
-      );
+      _scheduleRoutineNotifications(widget.resident_id);
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -65,6 +59,82 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
       setState(() {
         isLoading = false;
       });
+    }
+  }
+
+  Future<void> _cancelExistingNotifications(String residentId) async {
+    final routineTypes = [
+      'wake',
+      'sleep',
+      'breakfast',
+      'lunch',
+      'exercise',
+      'dinner',
+      'call',
+    ];
+    for (var type in routineTypes) {
+      final notificationId = '$residentId-$type'.hashCode;
+      await RoutineNotificationService.cancelNotification(notificationId);
+    }
+  }
+
+  Future<void> _scheduleRoutineNotifications(String residentId) async {
+
+    int generateNotificationId(String residentId, String type) {
+      // Create a consistent numeric ID from the UUID and type
+      return ('$residentId-$type')
+          .hashCode
+          .abs(); // Use absolute value to ensure positive
+    }
+
+    if (_waketime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'wake'),
+        'Wake Up Time ',
+        _waketime.text,
+      );
+    }
+    if (_sleeptime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'sleep'),
+        'Sleep Time',
+        _sleeptime.text,
+      );
+    }
+    if (_breakfasttime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'breakfast'),
+        'Breakfast Time',
+        _breakfasttime.text,
+      );
+    }
+    if (_lunchtime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'lunch'),
+        'Lunch Time',
+        _lunchtime.text,
+      );
+    }
+    if (_exercisetime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'exercise'),
+        'Exercise Time',
+        _exercisetime.text,
+      );
+    }
+    if (_dinnertime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'dinner'),
+        'Dinner Time',
+        _dinnertime.text,
+      );
+    }
+    if (_calltime.text.isNotEmpty) {
+      await RoutineNotificationService.scheduleNotification(
+        generateNotificationId(residentId, 'call'),
+        'Call Reminder Time',
+        _calltime.text,
+      );
     }
   }
 
@@ -145,13 +215,10 @@ class _UpdateRoutineState extends State<UpdateRoutine> {
                             borderRadius: BorderRadius.circular(10)),
                       ),
                       onPressed: () async {
-                        
-                        // await RoutineNotificationService.cancelAllNotifications();
-                        RoutineNotificationService.testScheduling();
                         submit();
                       },
                       child: const Text(
-                        'Update Routine',
+                        'Update',
                         style: TextStyle(
                             fontSize: 20,
                             fontWeight: FontWeight.bold,
