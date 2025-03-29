@@ -3,6 +3,7 @@ import 'package:admin_wellnest/main.dart';
 import 'package:admin_wellnest/screens/homepage.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,13 +19,50 @@ class _LoginScreenState extends State<LoginScreen> {
   String p = '';
   final formKey = GlobalKey<FormState>();
   bool _isVisible = true;
+  
   Future<void> submit() async {
-    final auth = await supabase.auth
-        .signInWithPassword(password: password.text, email: email.text);
-    final admin =
-        await supabase.from('tbl_admin').count().eq('admin_id', auth.user!.id);
-    print(admin);
+  try {
+    final auth = await supabase.auth.signInWithPassword(
+      password: password.text, 
+      email: email.text,
+    );
+    
+    if (auth.user != null) {
+      final admin = await supabase
+          .from('tbl_admin')
+          .count()
+          .eq('admin_id', auth.user!.id);
+          print(admin);  // Print the count of admin records
+      
+      print("Admin count: $admin");
+
+      if (admin > 0) {  // Check if count is greater than 0
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (context) => const Homepage(),
+          ),
+        );
+      } else {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login failed: Admin not found')),
+        );
+      }
+    }
+  } on AuthException catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Login failed: ${e.message}')),
+    );
+  } catch (e) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Error: ${e.toString()}')),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -147,11 +185,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
                               submit();
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (context) => Homepage()),
-                              );
+                              
                             }
                           },
                           child: Text("Log in"),
