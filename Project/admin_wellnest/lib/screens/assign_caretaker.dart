@@ -27,7 +27,12 @@ class _AssignCaretakerState extends State<AssignCaretaker> {
     });
     try {
       final response = await supabase.from('tbl_caretaker').select();
-      print("Fetched caretaker data: $response");
+      for(var item in response) {
+      final assign = await supabase.from('tbl_assign').count().eq('caretaker_id', item['caretaker_id']).neq('resident_id', widget.id);
+      if(assign>=1){
+        response.remove(item);
+      }
+      }
       setState(() {
         caretaker = List<Map<String, dynamic>>.from(response);
         isLoading = false;
@@ -63,7 +68,7 @@ class _AssignCaretakerState extends State<AssignCaretaker> {
       if (currentCaretakerId != null) {
         await supabase
             .from('tbl_assign')
-            .update({'caretaker_id': id})
+            .update({'caretaker_id': id, 'assign_date':DateTime.now().toIso8601String()})
             .eq('resident_id', widget.id);
       } else {
         await supabase.from('tbl_assign').insert({
