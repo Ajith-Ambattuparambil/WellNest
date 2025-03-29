@@ -2,6 +2,7 @@ import 'package:family_member/main.dart';
 import 'package:family_member/screens/fam_profile.dart';
 import 'package:family_member/screens/homepage.dart';
 import 'package:family_member/screens/login_page.dart';
+import 'package:family_member/screens/view_bookings.dart';
 import 'package:family_member/screens/visit_booking.dart';
 import 'package:family_member/services/notification_services.dart';
 import 'package:flutter/material.dart';
@@ -158,19 +159,43 @@ class _ProfileGridState extends State<ProfileGrid> {
           }
         },
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(context, MaterialPageRoute(builder: (context) => VisitBooking(),) );
-        },
-        label: const Text(
-          'Book Visit',
-          style: TextStyle(color: Colors.white, fontSize: 20), // Set text color
-        ),
-        icon: const Icon(Icons.event, color: Colors.white), // Set icon color
-        backgroundColor: Color.fromARGB(255, 0, 36, 94), // Custom ARGB color
-        foregroundColor: Colors.white, // Ensures icon and text are white
+      floatingActionButton: Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    FloatingActionButton.extended(
+      onPressed: () {
+        Navigator.push(
+          context, 
+          MaterialPageRoute(builder: (context) => VisitBooking()),
+        );
+      },
+      label: const Text(
+        'Book Visit',
+        style: TextStyle(color: Colors.white, fontSize: 20),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      icon: const Icon(Icons.event, color: Colors.white),
+      backgroundColor: const Color.fromARGB(255, 0, 36, 94),
+      heroTag: 'bookVisit', // Unique heroTag for each FAB
+    ),
+    const SizedBox(width: 16), // Space between buttons
+    FloatingActionButton.extended(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => ViewBookings()),
+        );
+      },
+      label: const Text(
+        'View Bookings',
+        style: TextStyle(color: Colors.white, fontSize: 20),
+      ),
+      icon: const Icon(Icons.list_alt, color: Colors.white),
+      backgroundColor: const Color.fromARGB(255, 94, 33, 0), // Different color
+      heroTag: 'viewBookings', // Unique heroTag for each FAB
+    ),
+  ],
+),
+floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
