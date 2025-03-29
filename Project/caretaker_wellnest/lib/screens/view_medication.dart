@@ -1,13 +1,12 @@
 import 'package:caretaker_wellnest/components/notification_service.dart';
+import 'package:caretaker_wellnest/screens/update_medication.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:intl/intl.dart';
 
-import 'update_medication.dart';
-
 class ViewMedication extends StatefulWidget {
-  String resident_id;
-  ViewMedication({super.key, required this.resident_id});
+  final String residentId;
+  const ViewMedication({super.key, required this.residentId});
 
   @override
   State<ViewMedication> createState() => _ViewMedicationState();
@@ -28,7 +27,7 @@ class _ViewMedicationState extends State<ViewMedication> {
       final response = await supabase
           .from('tbl_medication')
           .select()
-          .eq('resident_id', widget.resident_id);
+          .eq('resident_id', widget.residentId);
 
       print("Supabase Response: $response"); // Debugging Output
 
@@ -51,43 +50,53 @@ class _ViewMedicationState extends State<ViewMedication> {
     }
   }
 
-  // void scheduleNotification(Map<String, dynamic> medication) {
-  //   String time = medication['medication_timing']; // Format: HH:mm:ss
-  //   // int count = medication['medication_count'];
-  //   String name = medication['medication_time']; // Medication Name
+  Future<void> _cancelExistingNotifications(int mid) async {
+    final notificationId = '$mid-medication'.hashCode;
+    await RoutineNotificationService.cancelNotification(notificationId);
+  }
 
-  //   DateTime now = DateTime.now();
-  //   DateTime medicationDateTime = DateTime(
-  //     now.year, now.month, now.day,
-  //     int.parse(time.split(":")[0]), // Hour
-  //     int.parse(time.split(":")[1]), // Minute
-  //   );
+  Future<void> deletemedication(int mid) async {
+    try {
+      final response = await supabase
+          .from('tbl_medication')
+          .delete()
+          .eq('medication_id', mid);
 
-  //   // Schedule a notification 10 minutes before the medication time
-  //   DateTime reminderTime =
-  //       medicationDateTime.subtract(const Duration(minutes: 10));
+      print("Supabase Response: $response"); // Debugging Output
+      _cancelExistingNotifications(mid);
+      setState(() {
+        medications = List<Map<String, dynamic>>.from(response);
+      });
 
-  //   if (reminderTime.isAfter(now)) {
-  //     NotificationService.scheduleNotification(
-  //       medicationDateTime.millisecondsSinceEpoch ~/ 1000, // Unique ID
-  //       "Medication Reminder: $name",
-  //       reminderTime,
-  //     );
-  //   }
-  // }
+      if (medications.isEmpty) {
+        print("No medications found in the database.");
+      } else {
+        print("Medications fetched successfully: $medications");
+      }
+    } catch (error) {
+      print("Error fetching medications: $error");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color.fromARGB(230, 255, 252, 197),
-      appBar: AppBar(title: const Text('View Medication', style: TextStyle(
-        fontSize: 23, fontWeight: FontWeight.bold, color: Color.fromARGB(255, 255, 255, 255)
-      ),), 
-      backgroundColor: Color.fromARGB(255, 0, 36, 94),
-      foregroundColor: Colors.white,),
+      appBar: AppBar(
+        title: const Text(
+          'View Medication',
+          style: TextStyle(
+              fontSize: 23,
+              fontWeight: FontWeight.bold,
+              color: Color.fromARGB(255, 255, 255, 255)),
+        ),
+        backgroundColor: Color.fromARGB(255, 0, 36, 94),
+        foregroundColor: Colors.white,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             medications.isEmpty
                 ? const Center(child: Text("No Medications Available"))
@@ -107,6 +116,13 @@ class _ViewMedicationState extends State<ViewMedication> {
                             subtitle: Text(
                               "Time: $formattedTime\nCount: ${medication['medication_count']}",
                             ),
+                            trailing: IconButton(
+                                onPressed: () {
+                                  deletemedication(medication['medication_id']);
+                                  fetchMedications(); // Refresh the medication list
+                                },
+                                icon: Icon(Icons.delete,
+                                    color: Color.fromARGB(255, 0, 36, 94))),
                           ),
                         );
                       },
@@ -129,7 +145,7 @@ class _ViewMedicationState extends State<ViewMedication> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        UpdateMedication(residentId: widget.resident_id),
+                        UpdateMedication(residentId: widget.residentId),
                   ),
                 );
 
