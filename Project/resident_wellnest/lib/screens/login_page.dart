@@ -2,6 +2,7 @@ import 'package:resident_wellnest/components/form_validation.dart';
 import 'package:flutter/material.dart';
 import 'package:resident_wellnest/main.dart';
 import 'package:resident_wellnest/screens/homepage.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 // import 'package:flutter/gestures.dart';
 
 class LoginPage extends StatefulWidget {
@@ -22,45 +23,55 @@ class _LoginPageState extends State<LoginPage> {
   String password = '';
 
   Future<void> submit() async {
-    if (formKey.currentState!.validate()) {
-      setState(() {
-        email = emailController.text;
-        password = passwordController.text;
-      });
+  if (formKey.currentState!.validate()) {
+    setState(() {
+      email = emailController.text;
+      password = passwordController.text;
+    });
 
-      try {
-        // Sign in with email and password
-        final response = await supabase.auth.signInWithPassword(
-          email: email,
-          password: password,
-        );
-        
+    try {
+      // Sign in with email and password
+      final response = await supabase.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+      
+      if (response.user != null) {
+        // Navigate to ManageProfile screen on successful login
         final resident = await supabase
             .from('tbl_resident')
             .select()
-            .eq('resident_id', response.user!.id)
-            .single();
-        print('resident: $resident');
-
+            .eq('resident_id', response.user!.id);
         if (resident.isNotEmpty) {
+          if (!mounted) return;
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => Homepage()),
+            MaterialPageRoute(
+              builder: (context) => const Homepage(),
+            ),
           );
         } else {
-          // Handle invalid credentials
+          if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Invalid email or password')),
+            const SnackBar(content: Text('Login failed: Resident not found')),
           );
         }
-      } catch (e) {
-        // Handle other errors
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
-        );
       }
+    } on AuthException catch (e) {
+      // Handle authentication-specific errors
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Login failed: ${e.message}')),
+      );
+    } catch (e) {
+      // Handle other errors
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
