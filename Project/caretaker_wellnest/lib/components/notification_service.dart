@@ -17,6 +17,44 @@ class RoutineNotificationService {
     streamController.add(notificationResponse);
   }
 
+  static Future<void> scheduleOneTimeNotification({
+    required int id,
+    required String title,
+    required String body,
+    required tz.TZDateTime scheduledDate,
+  }) async {
+    try {
+      const AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
+        'appointment_channel', // Use a different channel for appointments
+        'Appointment Notifications',
+        channelDescription: 'Reminders for doctor appointments',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+      const NotificationDetails notificationDetails =
+          NotificationDetails(android: androidDetails);
+
+      final bool canUseExact = await Permission.scheduleExactAlarm.isGranted;
+
+      await _notificationsPlugin.zonedSchedule(
+        id,
+        title,
+        body,
+        scheduledDate,
+        notificationDetails,
+        androidScheduleMode: canUseExact
+            ? AndroidScheduleMode.exactAllowWhileIdle
+            : AndroidScheduleMode.inexactAllowWhileIdle,
+        // No matchDateTimeComponents here, making it one-time
+        payload: 'appointment-$id',
+      );
+
+      print('One-time notification scheduled: ID $id at $scheduledDate');
+    } catch (e) {
+      print('Error scheduling one-time notification: $e');
+    }
+  }
+
   // Initialize the service
   static Future<void> init() async {
     // Initialize time zones
@@ -179,7 +217,7 @@ class RoutineNotificationService {
 
       await _notificationsPlugin.zonedSchedule(
         id,
-        'Routine Alert',
+        'Reminder',
         '$title is scheduled now',
         scheduledDate,
         notificationDetails,
@@ -233,7 +271,7 @@ class RoutineNotificationService {
     await scheduleNotification(
       999,
       "Test",
-      "21:31", // Replace with a time 2 minutes in the future
+      "11:37", // Replace with a time 2 minutes in the future
     );
   }
 }
