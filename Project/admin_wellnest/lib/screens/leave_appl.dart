@@ -18,21 +18,19 @@ class _LeaveApplicationState extends State<LeaveApplication> {
   }
 
   Future<void> fetchFiletype() async {
-  try {
-    final response = await supabase
-        .from('tbl_leave')
-        .select('*, tbl_caretaker("*")')
-        .eq('leave_status', 0);
+    try {
+      final response = await supabase
+          .from('tbl_leave')
+          .select('*, tbl_caretaker("*")')
+          .eq('leave_status', 0);
 
-    setState(() {
-      _filetypeList = response;
-    });
-  } catch (e) {
-    print("ERROR FETCHING FILE TYPE DATA: $e");
+      setState(() {
+        _filetypeList = response;
+      });
+    } catch (e) {
+      print("ERROR FETCHING FILE TYPE DATA: $e");
+    }
   }
-}
-
-
 
   Future<void> updateLeaveStatus(String leaveId, int status) async {
     try {
@@ -58,7 +56,7 @@ class _LeaveApplicationState extends State<LeaveApplication> {
       () => updateLeaveStatus(leaveId, 2),
     );
   }
-
+  
   void _showConfirmationDialog(String message, VoidCallback onConfirm) {
     showDialog(
       context: context,
@@ -83,7 +81,6 @@ class _LeaveApplicationState extends State<LeaveApplication> {
       },
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -118,7 +115,9 @@ class _LeaveApplicationState extends State<LeaveApplication> {
                           itemCount: _filetypeList.length,
                           itemBuilder: (context, index) {
                             final entry = _filetypeList[index];
-                            final caretaker=entry['tbl_caretaker']['caretaker_name'].toString();
+                            final caretaker = entry['tbl_caretaker']
+                                    ['caretaker_name']
+                                .toString();
                             print(caretaker);
                             return Card(
                               margin: EdgeInsets.symmetric(vertical: 10),
