@@ -253,8 +253,7 @@ class _ManageResidentState extends State<ManageResident> {
                                     );
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors
-                                        .orange, // Different color for Reassign
+                                    backgroundColor: Color.fromARGB(255, 26, 196, 196), 
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 10),

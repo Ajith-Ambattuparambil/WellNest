@@ -144,9 +144,16 @@ class _ViewHealthState extends State<ViewHealth> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                  builder: (context) => UpdateHealth(
-                                      residentId: widget.resident_id)),
-                            );
+                                builder: (context) => UpdateHealth(
+                                  residentId: widget.resident_id,
+                                ),
+                              ),
+                            ).then((value) {
+                            
+                              if (value == true) {
+                                fetchHealthData();
+                              }
+                            });
                           },
                           child: const Text(
                             'Update Health',
