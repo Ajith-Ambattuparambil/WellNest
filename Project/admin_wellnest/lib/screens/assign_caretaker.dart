@@ -29,7 +29,7 @@ class _AssignCaretakerState extends State<AssignCaretaker> {
       final response = await supabase.from('tbl_caretaker').select();
       for(var item in response) {
       final assign = await supabase.from('tbl_assign').count().eq('caretaker_id', item['caretaker_id']).neq('resident_id', widget.id);
-      if(assign>=1){
+      if(assign>=6){
         response.remove(item);
       }
       }
@@ -78,7 +78,7 @@ class _AssignCaretakerState extends State<AssignCaretaker> {
       }
 
       await supabase.from('tbl_resident').update({
-        'resident_status': 3,
+        'resident_status': 4,
       }).eq('resident_id', widget.id);
 
       ScaffoldMessenger.of(context).showSnackBar(

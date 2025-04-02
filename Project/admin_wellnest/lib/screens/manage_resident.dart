@@ -25,7 +25,7 @@ class _ManageResidentState extends State<ManageResident> {
       final response = await supabase
           .from('tbl_resident')
           .select('*, tbl_relation(*), tbl_room(*)')
-          .inFilter('resident_status', [1, 3]);
+          .inFilter('resident_status', [1, 3,4]);
       setState(() {
         _filetypeList = response;
       });
@@ -53,7 +53,7 @@ class _ManageResidentState extends State<ManageResident> {
       await supabase.from('tbl_assign').delete().eq('resident_id', id);
       await supabase
           .from('tbl_resident')
-          .update({'resident_status': 4}).eq('resident_id', id);
+          .update({'resident_status': 5}).eq('resident_id', id);
       showDialog(
         context: context,
         builder: (context) {
