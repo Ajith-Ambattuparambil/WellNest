@@ -1,10 +1,12 @@
-import 'dart:io';
+import 'dart:html' as html; // For web download
 import 'dart:typed_data';
-
 import 'package:admin_wellnest/components/form_validation.dart';
 import 'package:admin_wellnest/main.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart'; // For PdfGoogleFonts
 
 class ManageCaretaker extends StatefulWidget {
   const ManageCaretaker({super.key});
@@ -33,7 +35,7 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
 
   Future<void> handleImagePick() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
-      allowMultiple: false, // Only single file upload
+      allowMultiple: false,
     );
     if (result != null) {
       setState(() {
@@ -61,24 +63,12 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
     }
   }
 
-  // Future<void> register() async {
-  //   try {
-  //     final auth = await supabase.auth.signUp(
-  //         password: passwordController.text, email: emailController.text);
-  //     String uid = auth.user!.id;
-  //     submit(uid);
-  //   } catch (e) {
-  //     print('Error: $e');
-  //   }
-  // }
-
   Future<void> submit() async {
     if (formKey.currentState!.validate()) {
       setState(() {
         isLoading = true;
       });
       try {
-        // Sign up the user
         final auth = await supabase.auth.signUp(
           password: passwordController.text,
           email: emailController.text,
@@ -87,7 +77,6 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
         String uid = auth.user!.id;
         String? url = await photoUpload(uid);
 
-        // Check if URL is valid before proceeding
         if (url != null && url.isNotEmpty) {
           await supabase.from('tbl_caretaker').insert({
             'caretaker_id': uid,
@@ -98,7 +87,6 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
             'caretaker_photo': url,
           });
 
-          // Show success message
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
             content: Text(
               "Caretaker details updated successfully!",
@@ -109,23 +97,18 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
 
           print("Insert Successful");
 
-          // Clear all controllers
           nameController.clear();
           emailController.clear();
           passwordController.clear();
           confirmPasswordController.clear();
           phoneController.clear();
 
-          // Reset form and image
           setState(() {
             pickedImage = null;
-            isLoading = false; // Move this here to ensure UI updates
+            isLoading = false;
           });
 
-          // Reset form state
           formKey.currentState!.reset();
-
-          // Refresh data
           await fetchData();
         } else {
           throw Exception("Photo upload failed");
@@ -137,7 +120,6 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
           backgroundColor: Colors.red,
         ));
       } finally {
-        // Ensure loading state is always reset, even on error
         setState(() {
           isLoading = false;
         });
@@ -147,15 +129,14 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
 
   Future<String?> photoUpload(String uid) async {
     try {
-      final bucketName = 'ct_files'; // Replace with your bucket name
+      final bucketName = 'ct_files';
       final filePath = "$uid-${pickedImage!.name}";
       await supabase.storage.from(bucketName).uploadBinary(
             filePath,
-            pickedImage!.bytes!, // Use file.bytes for Flutter Web
+            pickedImage!.bytes!,
           );
       final publicUrl =
           supabase.storage.from(bucketName).getPublicUrl(filePath);
-      // await updateImage(uid, publicUrl);
       return publicUrl;
     } catch (e) {
       print("Error photo upload: $e");
@@ -186,6 +167,73 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
     }
   }
 
+  Future<void> _generateAndDownloadPdf() async {
+    final pdf = pw.Document();
+
+    if (caretaker.isEmpty) {
+      print('No data available to generate PDF');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('No caretaker data to export')),
+      );
+      return;
+    }
+
+    // Load Roboto font for Unicode support
+    final font = await PdfGoogleFonts.robotoRegular();
+    final boldFont = await PdfGoogleFonts.robotoBold();
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.a4,
+        margin: pw.EdgeInsets.all(32),
+        build: (pw.Context context) {
+          return [
+            pw.Header(
+              level: 0,
+              child: pw.Text(
+                'Caretaker List',
+                style: pw.TextStyle(font: boldFont, fontSize: 24),
+              ),
+            ),
+            pw.TableHelper.fromTextArray(
+              headers: [
+                'Sl.No',
+                'Name',
+                'Email',
+                'Contact',
+              ],
+              data: caretaker.asMap().entries.map((entry) {
+                print('Processing entry: ${entry.value}');
+                return [
+                  (entry.key + 1).toString(),
+                  entry.value['caretaker_name']?.toString() ?? 'N/A',
+                  entry.value['caretaker_email']?.toString() ?? 'N/A',
+                  entry.value['caretaker_contact']?.toString() ?? 'N/A',
+                ];
+              }).toList(),
+              border: pw.TableBorder.all(),
+              headerStyle:
+                  pw.TextStyle(font: boldFont, fontWeight: pw.FontWeight.bold),
+              cellStyle: pw.TextStyle(font: font),
+              cellAlignment: pw.Alignment.centerLeft,
+              cellPadding: pw.EdgeInsets.all(5),
+            ),
+          ];
+        },
+      ),
+    );
+
+    // Generate PDF bytes and trigger download
+    final pdfBytes = await pdf.save();
+    final blob = html.Blob([pdfBytes]);
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..setAttribute(
+          'download', 'caretaker_list_${DateTime.now().toString()}.pdf')
+      ..click();
+    html.Url.revokeObjectUrl(url);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -208,7 +256,6 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
               borderRadius: BorderRadius.circular(20),
             ),
             color: Colors.white,
-            // margin: EdgeInsets.symmetric(horizontal: 100, vertical: 30),
             child: Padding(
               padding: const EdgeInsets.all(30),
               child: Form(
@@ -284,15 +331,10 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
                                 borderRadius: BorderRadius.circular(100),
                                 child: pickedImage!.bytes != null
                                     ? Image.memory(
-                                        Uint8List.fromList(
-                                            pickedImage!.bytes!), // For web
+                                        Uint8List.fromList(pickedImage!.bytes!),
                                         fit: BoxFit.cover,
                                       )
-                                    : Image.file(
-                                        File(pickedImage!
-                                            .path!), // For mobile/desktop
-                                        fit: BoxFit.cover,
-                                      ),
+                                    : Placeholder(), // Fallback for non-web platforms
                               ),
                             ),
                     ),
@@ -320,20 +362,34 @@ class _ManageCaretakerState extends State<ManageCaretaker> {
                     SizedBox(height: 30),
                     Divider(),
                     SizedBox(height: 20),
-                    Text(
-                      "Caretaker List",
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromARGB(255, 24, 56, 111),
-                        shadows: [
-                          Shadow(
-                            blurRadius: 2,
-                            color: Colors.black12,
-                            offset: Offset(1, 1),
-                          )
-                        ],
-                      ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "Caretaker List",
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 24, 56, 111),
+                            shadows: [
+                              Shadow(
+                                blurRadius: 2,
+                                color: Colors.black12,
+                                offset: Offset(1, 1),
+                              )
+                            ],
+                          ),
+                        ),
+                        ElevatedButton.icon(
+                          icon: Icon(Icons.download),
+                          label: Text('Download PDF'),
+                          onPressed: _generateAndDownloadPdf,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color.fromARGB(255, 24, 56, 111),
+                            foregroundColor: Colors.white,
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: 20),
                     isLoading
