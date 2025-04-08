@@ -44,7 +44,7 @@ class _PaymentVisitbookingState extends State<PaymentVisitbooking> {
       };
 
       await supabase.from('tbl_payment').insert(paymentData);
-      await supabase.from('tbl_visitbooking').update({'visitbooking_status': 1}).eq('visitbooking_id', widget.id);
+      await supabase.from('tbl_familybooking').update({'familybooking_status': 1}).eq('familybooking_id', widget.id);
       Fluttertoast.showToast(
         msg: "Payment Successful: ${response.paymentId}",
         toastLength: Toast.LENGTH_SHORT,
