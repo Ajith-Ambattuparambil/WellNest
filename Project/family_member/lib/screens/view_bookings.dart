@@ -80,7 +80,7 @@ class _ViewBookingsState extends State<ViewBookings> {
                 child: ListTile(
                   title: Text('Booking ID: ${booking['familybooking_id']}'),
                   subtitle: Text(
-                      'From: ${booking['familybooking_fromdate']} To: ${booking['familybooking_todate']}\nStatus: ${booking['familybooking_status'] == '1' ? 'Confirmed' : 'Pending'}'),
+                      'From: ${booking['familybooking_fromdate']} To: ${booking['familybooking_todate']}\nStatus: ${booking['familybooking_status'] == 1 ? 'Confirmed' : 'Pending'}'),
                 ),
               ))
         ],
