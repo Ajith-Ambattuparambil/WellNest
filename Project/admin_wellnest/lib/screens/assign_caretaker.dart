@@ -84,7 +84,7 @@ class _AssignCaretakerState extends State<AssignCaretaker> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Assigned")),
       );
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       print("Error: $e");
       ScaffoldMessenger.of(context).showSnackBar(
