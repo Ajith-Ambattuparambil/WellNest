@@ -324,7 +324,7 @@ class _ManageResidentState extends State<ManageResident> {
                                 ],
                               ),
                             )
-                          : entry.value['resident_status'] == 3
+                          : entry.value['resident_status'] == 4
                               ? Row(
                                   children: [
                                     ElevatedButton.icon(
@@ -464,8 +464,8 @@ class _ManageResidentState extends State<ManageResident> {
                                         size: 18,
                                       ),
                                       label: const Text("Assign"),
-                                      onPressed: () {
-                                        Navigator.push(
+                                      onPressed: () async {
+                                        final result = await Navigator.push(
                                           context,
                                           MaterialPageRoute(
                                             builder: (context) =>
@@ -474,6 +474,9 @@ class _ManageResidentState extends State<ManageResident> {
                                                         .value['resident_id']),
                                           ),
                                         );
+                                        if(result == true){
+                                          fetchFiletype();
+                                        }
                                       },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: const Color.fromARGB(
