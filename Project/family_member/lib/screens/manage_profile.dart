@@ -237,7 +237,7 @@ class ProfileCard extends StatelessWidget {
           );
         } else {
           // Show a message based on the status
-          String message;
+          String message = "";
           switch (residentStatus) {
             case 0:
             case 1:
@@ -247,6 +247,15 @@ class ProfileCard extends StatelessWidget {
               message = 'Admission has been rejected.';
               break;
             case 4:
+              message = "Welcome";
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomePage(profile: profile['resident_id']),
+                ),
+              );
+              break;
+            case 5:
               message = 'Resident has moved out or checked out.';
               break;
             default:
